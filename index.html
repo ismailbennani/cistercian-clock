@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+
+<head>
+  <title>The cistercian clock</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <script type="module" src="https://unpkg.com/cistercian-numerals"></script>
+
+  <style>
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      color: white;
+      font-family: Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+
+    h1,
+    p {
+      margin: 0;
+      padding: 0;
+    }
+
+    a {
+      color: unset;
+    }
+
+    body {
+      background-color: black;
+    }
+
+    #container {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1em;
+    }
+
+    #title {
+      width: 100%;
+      margin: 1em;
+    }
+
+    #cistercian-clock {
+      position: relative;
+      width: 0px;
+      height: 0px;
+    }
+
+    .spacer {
+      flex-grow: 1;
+    }
+
+    cistercian-number {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+    }
+
+    #seconds-number {
+      --cistercian-width: 4px;
+      /* Color of the center line (always displayed) */
+      --cistercian-color-0: #ffffff;
+      /* Color of the top line */
+      --cistercian-color-1: #ffffff;
+      /* Color of the oblique NW-SE line */
+      --cistercian-color-2: #ffffff;
+      /* Color of the bottom line */
+      --cistercian-color-3: #ffffff;
+      /* Color of the oblique NE-SW line */
+      --cistercian-color-4: #ffffff;
+      /* Color of the right line */
+      --cistercian-color-5: #ffffff;
+
+      font-size: 10em;
+      opacity: 0.2;
+    }
+
+    #hours-and-minutes-number {
+      --cistercian-width: 2px;
+      /* Color of the center line (always displayed) */
+      --cistercian-color-0: #ffffff00;
+      /* Color of the top line */
+      --cistercian-color-1: #0019a7ff;
+      /* Color of the oblique NW-SE line */
+      --cistercian-color-2: #751056ff;
+      /* Color of the bottom line */
+      --cistercian-color-3: #007229ff;
+      /* Color of the oblique NE-SW line */
+      --cistercian-color-4: #db241fff;
+      /* Color of the right line */
+      --cistercian-color-5: #fdcd01ff;
+
+      font-size: 10em;
+    }
+
+    #clock {
+      font-size: 2em;
+      font-weight: bolder;
+    }
+
+    .colon {
+      font-size: 1em;
+      font-weight: lighter;
+    }
+
+    #now-override {
+      width: 80%;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      padding: 1em;
+    }
+
+    #now-override-range {
+      width: 100%;
+    }
+
+    .dim {
+      color: grey;
+    }
+  </style>
+
+  <script>
+    var cistercianClockElement;
+    var secondsNumberElement;
+    var hoursAndMinutesNumber;
+    var hoursElement;
+    var minutesElement;
+    var secondsElement;
+
+    var nowOverrideEnabledElement;
+    var nowOverrideRangeContainerElement;
+    var nowOverrideRangeElement;
+
+    function update() {
+      var now;
+      if (nowOverrideEnabledElement?.checked) {
+        var totalSeconds = nowOverrideRangeElement.value;
+        var hours = Math.floor(totalSeconds / 3600);
+        var totalMinutes = totalSeconds % 3600;
+        var minutes = Math.floor(totalMinutes / 60);
+        var seconds = Math.floor(totalMinutes % 60);
+        now = new Date(1, 1, 1, hours, minutes, seconds, 0);
+
+        nowOverrideRangeElement.disabled = false;
+      } else {
+        now = new Date();
+        nowOverrideRangeElement.disabled = true;
+      }
+
+      var seconds = now.getSeconds();
+      var secondsWithLeadingZero = seconds >= 10 ? seconds.toString() : "0" + seconds.toString();
+      secondsNumberElement.value = seconds;
+
+      var minutes = now.getMinutes();
+      var minutesWithLeadingZero = minutes >= 10 ? minutes.toString() : "0" + minutes.toString();
+      var hours = now.getHours();
+      var hoursWithLeadingZero = hours >= 10 ? hours.toString() : "0" + hours.toString();
+      var minutesAndHours = hours.toString() + minutesWithLeadingZero;
+      hoursAndMinutesNumber.value = minutesAndHours;
+
+      var svg = secondsNumberElement.renderRoot.children[0];
+      cistercianClockElement.style.width = svg.clientWidth + "px";
+      cistercianClockElement.style.height = svg.clientHeight + "px";
+
+      hoursElement.innerText = hoursWithLeadingZero;
+      minutesElement.innerText = minutesWithLeadingZero;
+      secondsElement.innerText = secondsWithLeadingZero;
+    }
+
+    addEventListener("load", (evt) => {
+      cistercianClockElement = document.getElementById("cistercian-clock");
+      secondsNumberElement = document.getElementById("seconds-number");
+      hoursAndMinutesNumber = document.getElementById("hours-and-minutes-number");
+      hoursElement = document.getElementById("hours");
+      minutesElement = document.getElementById("minutes");
+      secondsElement = document.getElementById("seconds");
+      nowOverrideEnabledElement = document.getElementById("now-override-enabled");
+      nowOverrideRangeContainerElement = document.getElementById("now-override-range-container");
+      nowOverrideRangeElement = document.getElementById("now-override-range");
+
+      nowOverrideEnabledElement.addEventListener("change", update);
+      nowOverrideRangeElement.addEventListener("change", update);
+
+      update();
+      setInterval(update, 1000);
+    });
+  </script>
+</head>
+
+<body>
+  <div id="container">
+    <div id="title">
+      <h1>
+        The Cistercian clock
+      </h1>
+      <p class="dim">
+        Read more at
+        <i class="fa fa-wikipedia-w"></i>
+        <a href="https://en.wikipedia.org/wiki/Cistercian_numerals">Cistercian numerals</a>
+      </p>
+      <p class="dim">
+        Rendered using the great
+        <i class="fa fa-github"></i>
+        <a href="https://github.com/hsablonniere/cistercian-numerals">hsablonniere/cistercian-numerals</a>
+      </p>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div id="cistercian-clock">
+      <cistercian-number id="seconds-number" value="0"></cistercian-number>
+      <cistercian-number id="hours-and-minutes-number" value="0"></cistercian-number>
+    </div>
+    <div id="clock">
+      <span id="hours"></span>
+      <span class="colon">:</span>
+      <span id="minutes"></span>
+      <span class="colon">:</span>
+      <span id="seconds"></span>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div id="now-override">
+      <div id="now-override-enabled-container">
+        <input id="now-override-enabled" type="checkbox">
+        <label for="now-override-enabled">Override date</label>
+      </div>
+      <div id="now-override-container">
+        <input id="now-override-range" type="range" min="0" max="86400">
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
